@@ -9,6 +9,10 @@ int repetitions = 3;
 u_int8_t state_1[N + 2][N + 2];
 u_int8_t state_2[N + 2][N + 2];
 
+u_int8_t (*state_in)[N + 2][N + 2] = &state_1;
+u_int8_t (*state_out)[N + 2][N + 2] = &state_2;
+u_int8_t (*state_tmp)[N + 2][N + 2] = NULL;
+
 void field_initializer()
 {
     //fills fields with random numbers 0 = dead, 1 = alive
@@ -38,6 +42,25 @@ void calculate_next_gen(u_int8_t (*state)[N + 2][N + 2], u_int8_t (*state_old)[N
     return;
 }
 
+void write_pbm_file(u_int8_t (*state)[N + 2][N + 2])
+{
+    FILE *fptr;
+    fptr = fopen("output.pbm", "w");
+    fprintf(fptr, "P1\n");
+    fprintf(fptr, "# This is the result. Have fun :)\n");
+    fprintf(fptr, "%d %d\n", N, N);
+    for (int i = 1; i < N + 1; i++)
+    {
+        for (int j = 1; j < N + 1; j++)
+        {
+            fprintf(fptr, "%d ", (*state)[i][j]);
+        }
+        fprintf(fptr, "\n");
+    }
+    fclose(fptr);
+    return;
+}
+
 int main()
 {
     field_initializer();
@@ -55,37 +78,21 @@ int main()
     //calculation
     for (int i = 0; i < repetitions; i++)
     {
-        if (i & 1)
-        {
-            //ungerade
-            calculate_next_gen(&state_1, &state_2);
-            //print
-            for (int i = 0; i < N + 2; i++)
+        calculate_next_gen(state_out, state_in);
+        state_tmp = state_in;
+        state_in = state_out;
+        state_out = state_tmp;
+        for (int i = 0; i < N + 2; i++)
             {
                 for (int j = 0; j < N + 2; j++)
                 {
-                    printf("%d ", state_1[i][j]);
+                    printf("%d ", (*state_in)[i][j]);
                 }
                 printf("\n");
             }
-            printf("\n");
-        }
-        else
-        {
-            //gerade oder 0
-            calculate_next_gen(&state_2, &state_1);
-            //print
-            for (int i = 0; i < N + 2; i++)
-            {
-                for (int j = 0; j < N + 2; j++)
-                {
-                    printf("%d ", state_2[i][j]);
-                }
-                printf("\n");
-            }
-            printf("\n");
-        }
+        printf("\n");
     }
     printf("Done.\n");
+    write_pbm_file(state_in);
     exit(0);
 }
