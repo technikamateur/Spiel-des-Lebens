@@ -4,7 +4,7 @@
 
 //game size ist 32
 #define N 32
-int repetitions = 3;
+u_int16_t const repetitions = 3;
 //write output files
 u_int8_t const write_output = 1;
 
