@@ -5,6 +5,8 @@
 //game size ist 32
 #define N 32
 int repetitions = 3;
+//write output files
+u_int8_t const write_output = 1;
 
 u_int8_t state_1[N + 2][N + 2];
 u_int8_t state_2[N + 2][N + 2];
@@ -42,10 +44,12 @@ void calculate_next_gen(u_int8_t (*state)[N + 2][N + 2], u_int8_t (*state_old)[N
     return;
 }
 
-void write_pbm_file(u_int8_t (*state)[N + 2][N + 2])
+void write_pbm_file(u_int8_t (*state)[N + 2][N + 2], int i)
 {
     FILE *fptr;
-    fptr = fopen("output.pbm", "w");
+    char filename[20];
+    sprintf(filename, "output%d.pbm", i);
+    fptr = fopen(filename, "w");
     fprintf(fptr, "P1\n");
     fprintf(fptr, "# This is the result. Have fun :)\n");
     fprintf(fptr, "%d %d\n", N, N);
@@ -77,22 +81,16 @@ int main()
     printf("%d repetitions:\n", repetitions);
     //calculation
     for (int i = 0; i < repetitions; i++)
-    {
+    {   
         calculate_next_gen(state_out, state_in);
         state_tmp = state_in;
         state_in = state_out;
         state_out = state_tmp;
-        for (int i = 0; i < N + 2; i++)
-            {
-                for (int j = 0; j < N + 2; j++)
-                {
-                    printf("%d ", (*state_in)[i][j]);
-                }
-                printf("\n");
-            }
-        printf("\n");
+        if (write_output)
+        {
+            write_pbm_file(state_in, i);
+        }
     }
     printf("Done.\n");
-    write_pbm_file(state_in);
     exit(0);
 }
