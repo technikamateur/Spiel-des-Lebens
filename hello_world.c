@@ -65,23 +65,52 @@ void write_pbm_file(u_int8_t (*state)[N + 2][N + 2], int i)
     return;
 }
 
+void read_pbm_file()
+{
+    FILE *fptr;
+    fptr = fopen("input.pbm", "r");
+    if (fptr == NULL)
+    {
+        perror("Using random data. Unable to open input.pbm");
+        return;
+    }
+    printf("Found valid input file.\n");
+    char line[66];
+    u_int8_t line_count = 1;
+    while (fgets(line, 66, fptr))
+    {
+        if (line[0] == 48 || line[0] == 49)
+        {
+            //printf("line[%02d]: %s", line_count, line);
+            u_int8_t z = 0;
+            for (int j = 1; j < N + 1; j++)
+            {
+                if (line[z] == 48)
+                {
+                    state_1[line_count][j] = 0;
+                }
+                else
+                {
+                    state_1[line_count][j] = 1;
+                }
+                z+=2;
+            }
+            line_count++;
+        }
+    }
+    fclose(fptr);
+    return;
+}
+
 int main()
 {
+    printf("Defined array size is: %lu\n", ((sizeof(state_1) / sizeof(u_int8_t)) / (N + 2) - 2));
+    printf("%d repetitions\n", repetitions);
     field_initializer();
-    //print 2D array
-    for (int i = 0; i < N + 2; i++)
-    {
-        for (int j = 0; j < N + 2; j++)
-        {
-            printf("%d ", state_1[i][j]);
-        }
-        printf("\n");
-    }
-    printf("Array size is: %lu\n", (sizeof(state_1) / sizeof(u_int8_t)) / (N + 2));
-    printf("%d repetitions:\n", repetitions);
+    read_pbm_file();
     //calculation
     for (int i = 0; i < repetitions; i++)
-    {   
+    {
         calculate_next_gen(state_out, state_in);
         state_tmp = state_in;
         state_in = state_out;
