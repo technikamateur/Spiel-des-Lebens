@@ -1,3 +1,4 @@
+#include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -19,6 +20,7 @@ void field_initializer()
 {
     //fills fields with random numbers 0 = dead, 1 = alive
     srand(time(0));
+#pragma omp parallel for collapse(2)
     for (int i = 1; i < N + 1; i++)
     {
         for (int j = 1; j < N + 1; j++)
@@ -31,7 +33,8 @@ void field_initializer()
 
 void calculate_next_gen(u_int8_t (*state)[N + 2][N + 2], u_int8_t (*state_old)[N + 2][N + 2])
 {
-    //i = row, j = column
+//i = row, j = column
+#pragma omp parallel for collapse(2)
     for (int i = 1; i < N + 1; i++)
     {
         for (int j = 1; j < N + 1; j++)
@@ -53,6 +56,7 @@ void write_pbm_file(u_int8_t (*state)[N + 2][N + 2], int i)
     fprintf(fptr, "P1\n");
     fprintf(fptr, "# This is the result. Have fun :)\n");
     fprintf(fptr, "%d %d\n", N, N);
+#pragma omp parallel for
     for (int i = 1; i < N + 1; i++)
     {
         for (int j = 1; j < N + 1; j++)
@@ -83,6 +87,7 @@ void read_pbm_file()
         {
             //printf("line[%02d]: %s", line_count, line);
             u_int8_t z = 0;
+#pragma omp parallel for
             for (int j = 1; j < N + 1; j++)
             {
                 if (line[z] == 48)
@@ -93,7 +98,7 @@ void read_pbm_file()
                 {
                     state_1[line_count][j] = 1;
                 }
-                z+=2;
+                z += 2;
             }
             line_count++;
         }
